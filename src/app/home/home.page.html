@@ -1,20 +1,26 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title>Monitor Control</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <ion-button expand="block" (click)="hdmi()"> Switch to HDMI </ion-button>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <ion-button expand="block" (click)="dp()"> Switch to DisplayPort </ion-button>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Operation Log</ion-card-title>
+      <!-- <ion-card-subtitle></ion-card-subtitle> -->
+    </ion-card-header>
+
+    <ion-card-content>
+      @for (item of operationLog; track $index) {
+      <div class="operation-log-entry">
+        ➡️ {{ item?.message || "Performed an UNKNOWN operation"}}
+      </div>
+      }
+    </ion-card-content>
+  </ion-card>
 </ion-content>
