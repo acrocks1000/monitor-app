@@ -5,21 +5,47 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-button expand="block" (click)="hdmi()"> Switch to HDMI </ion-button>
+  <div class="tile-container">
+    <button ion-button class="tile-btn" (click)="hdmi()">
+      <ion-icon name="tv"></ion-icon>
+      <span>HDMI</span>
+    </button>
+    <button ion-button class="tile-btn" (click)="dp()">
+      <ion-icon name="desktop"></ion-icon>
+      <span>DisplayPort</span>
+    </button>
+  </div>
 
-  <ion-button expand="block" (click)="dp()"> Switch to DisplayPort </ion-button>
-
-  <ion-card>
-    <ion-card-header>
+  <ion-card class="log-card">
+    <ion-card-header class="log-header">
       <ion-card-title>Operation Log</ion-card-title>
-      <!-- <ion-card-subtitle></ion-card-subtitle> -->
     </ion-card-header>
 
-    <ion-card-content>
-      @for (item of operationLog; track $index) {
-      <div class="operation-log-entry">
-        ➡️ {{ item?.message || "Performed an UNKNOWN operation"}}
-      </div>
+    <ion-card-content class="log-content">
+      @if (operationLog.length === 0) {
+        <div class="empty-log">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <p>No operations yet</p>
+        </div>
+      } @else {
+        <div class="log-entries">
+          @for (item of operationLog; track $index) {
+            <div class="log-entry" [class.error]="item.isError">
+              <div class="log-entry-header" (click)="toggleExpanded($index)">
+                <ion-icon [name]="item.isError ? 'alert-circle' : 'checkmark-circle'"></ion-icon>
+                <span class="log-message">{{ item.shortMessage }}</span>
+                @if (item.details) {
+                  <ion-icon name="chevron-forward" class="expand-icon" [class.expanded]="item.expanded"></ion-icon>
+                }
+              </div>
+              @if (item.expanded && item.details) {
+                <div class="log-details">
+                  <div class="detail-reason">{{ item.details }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
       }
     </ion-card-content>
   </ion-card>
