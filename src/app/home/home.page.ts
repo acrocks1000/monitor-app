@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonIcon } from '@ionic/angular/standalone';
 import { MonitorApi } from '../services/monitor-api';
+import { ServiceDiscoveryService, DiscoveryEvent } from '../services/service-discovery';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 
 interface LogEntry {
   shortMessage: string;
@@ -24,16 +25,47 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private api: MonitorApi,
+    private discovery: ServiceDiscoveryService,
   ) {}
 
   ngOnInit(): void {
+    this.discovery.discoveryEvent$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((e): e is DiscoveryEvent => e !== null && e.type !== 'cached'),
+      )
+      .subscribe((event) => this.handleDiscoveryEvent(event));
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
+  private handleDiscoveryEvent(event: DiscoveryEvent): void {
+    const methodLabel = event.method === 'nsd' ? 'via NSD' : 'via hostname';
+
+    switch (event.type) {
+      case 'discovered':
+        this.addLogEntry(
+          `Service discovered ${methodLabel}`,
+          false,
+          `${event.serviceInfo!.address}:${event.serviceInfo!.port}`,
+        );
+        break;
+      case 'ip-changed':
+        this.addLogEntry(
+          'Service IP changed',
+          false,
+          `New address: ${event.serviceInfo!.address}:${event.serviceInfo!.port}`,
+        );
+        break;
+      case 'failed':
+        this.addLogEntry('Service discovery failed', true, event.error);
+        break;
+    }
+  }
+
   private getErrorDetailMessage(status: number | null, errorMessage: string): string {
     if (status === 404) {
       return 'Endpoint not found. Check if the service is running.';

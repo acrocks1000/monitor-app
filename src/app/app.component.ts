@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
-import { tv, desktop } from 'ionicons/icons';
+import { tv, desktop, checkmarkCircle, alertCircle, chevronForward } from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +11,6 @@ import { tv, desktop } from 'ionicons/icons';
 })
 export class AppComponent {
   constructor() {
-    addIcons({ tv, desktop })
+    addIcons({ tv, desktop, 'checkmark-circle': checkmarkCircle, 'alert-circle': alertCircle, 'chevron-forward': chevronForward });
   }
 }

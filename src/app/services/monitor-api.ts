@@ -1,15 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
-import { Constants } from '../shared/constant';
-import { from, map, Observable } from 'rxjs';
+import { from, map, Observable, switchMap } from 'rxjs';
+import { ServiceDiscoveryService } from './service-discovery';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MonitorApi {
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private discovery: ServiceDiscoveryService,
+  ) {}
 
   switchToHDMI(): Observable<any> {
     return this.get('/api/input/hdmi');
@@ -20,15 +23,19 @@ export class MonitorApi {
   }
 
   private get(path: string): Observable<any> {
-    const url = `${Constants.targetURL}${path}`;
+    return from(this.discovery.discoverService()).pipe(
+      switchMap((service) => {
+        const url = `${service.url}${path}`;
 
-    if (Capacitor.isNativePlatform()) {
-      return from(CapacitorHttp.get({ url })).pipe(
-        map((response) => response.data),
-      );
-    }
+        if (Capacitor.isNativePlatform()) {
+          return from(CapacitorHttp.get({ url })).pipe(
+            map((response) => response.data),
+          );
+        }
 
-    return this.http.get(url);
+        return this.http.get(url);
+      }),
+    );
   }
 
 }
